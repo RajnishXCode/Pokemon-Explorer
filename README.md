@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pokemon Explorer
+
+A modern, responsive Pokemon explorer built with Next.js 14, TypeScript, and Tailwind CSS. This application allows users to browse, search, and view detailed information about Pokemon.
+
+## Features
+
+- **Modern UI**: Clean and responsive design that works on all devices
+- **Fast Search**: Client-side search functionality for quick Pokemon lookup
+- **Detailed Information**: Comprehensive Pokemon details including:
+  - Official artwork
+  - Types with color coding
+  - Base stats with visual representation
+  - Height and weight
+  - Abilities (including hidden abilities)
+- **Performance Optimized**:
+  - Server-side rendering for better SEO
+  - Optimized image loading
+  - Client-side caching
+  - Smooth loading states
+
+## Tech Stack
+
+- **Framework**: Next.js 14
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Data Source**: PokeAPI
+- **State Management**: React Context
+- **Deployment**: Vercel (recommended)
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/pokemon-explorer.git
+   cd pokemon-explorer
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Project Structure
+
+```
+pokemon-explorer/
+├── src/
+│   ├── app/                 # Next.js app directory
+│   ├── components/         # React components
+│   ├── api/               # API utilities
+│   ├── types/            # TypeScript types
+│   └── utils/            # Utility functions
+├── public/              # Static files
+└── package.json        # Project dependencies
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features in Detail
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Home Page
+- Responsive Pokemon grid
+- Search functionality
+- Smooth loading states
+- Type-based color coding
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Detail Page
+- Dynamic routing for each Pokemon
+- Comprehensive Pokemon information
+- Visual stat representation
+- Type badges with official colors
+- Loading skeleton for better UX
 
-## Learn More
+## Performance Considerations
 
-To learn more about Next.js, take a look at the following resources:
+- Server-side rendering for initial page load
+- Client-side caching for better performance
+- Optimized image loading with Next.js Image component
+- Responsive design for all screen sizes
+- Efficient search with client-side filtering
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## SEO Optimization
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Server-side rendering for better indexing
+- Dynamic metadata for each Pokemon
+- OpenGraph and Twitter card support
+- Proper semantic HTML structure
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Data provided by [PokeAPI](https://pokeapi.co/)
+- Pokemon is a trademark of Nintendo/Game Freak
