@@ -1,4 +1,5 @@
 export interface Pokemon {
+  image: string | URL
   id: number
   name: string
   sprites: {

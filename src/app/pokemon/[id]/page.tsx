@@ -1,87 +1,45 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { getPokemonById } from '@/api/pokemon'
-import type { Pokemon } from '@/types/pokemon'
+import { Metadata } from 'next'
+import { getPokemonById } from '../../../api/pokemon'
+// import { StatBar } from '../../../components/pokemon/StatBar'
+// import { TypeBadge } from '../../../components/pokemon/TypeBadge'
+import type { Pokemon } from '../../../types/pokemon'
+import { notFound } from 'next/navigation'
 import { getTypeColor } from '@/utils/pokemon'
-import type { Metadata, ResolvingMetadata } from 'next'
 
+// Update the type definition to match Next.js's expectations
 type Props = {
   params: { id: string }
+  searchParams: Record<string, string | string[] | undefined>
 }
 
-export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    // First await the params to ensure id is available
-    const id = params.id;
-    const pokemon = await getPokemonById(parseInt(id));
-    const formattedName = pokemon.name
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-
-    const imageUrl = pokemon.sprites.other?.['official-artwork']?.front_default;
-
+    const pokemon = await getPokemonById(parseInt(params.id, 10))
     return {
-      title: formattedName,
-      description: `Learn about ${formattedName}'s stats, abilities, and more. View detailed information about this Pokemon's types and characteristics.`,
+      title: `${pokemon.name} - Pokemon Explorer`,
+      description: `View details for ${pokemon.name}, a ${pokemon.types.join('/')} type Pokemon`,
       openGraph: {
-        title: formattedName,
-        description: `Learn about ${formattedName}'s stats, abilities, and more.`,
-        images: imageUrl ? [
-          {
-            url: imageUrl,
-            width: 600,
-            height: 600,
-            alt: formattedName,
-          },
-        ] : [],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: formattedName,
-        description: `Learn about ${formattedName}'s stats, abilities, and more.`,
-        images: imageUrl ? [imageUrl] : [],
+        images: [{ url: pokemon.image, width: 400, height: 400 }],
       },
     }
   } catch (error) {
     return {
-      title: 'Pokemon Not Found',
-      description: 'The requested Pokemon could not be found.',
+      title: 'Pokemon Not Found - Pokemon Explorer',
+      description: 'The requested Pokemon could not be found',
     }
   }
 }
 
-export default async function PokemonDetail({ params }: Props) {
-  let pokemon: Pokemon | null = null
-  let error: Error | null = null
+export default async function PokemonDetailPage({ params }: Props) {
+  let pokemon: Pokemon
 
   try {
-    // First await the params to ensure id is available
-    const id = await params.id
-    pokemon = await getPokemonById(parseInt(id))
-  } catch (err) {
-    error = err instanceof Error ? err : new Error('Failed to fetch Pokemon')
+    pokemon = await getPokemonById(parseInt(params.id, 10))
+  } catch (error) {
+    notFound()
   }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong!</h2>
-        <p className="text-gray-600 mb-4">{error.message}</p>
-        <Link 
-          href="/"
-          className="text-blue-600 hover:text-blue-700 font-medium"
-        >
-          ← Back to Pokemon list
-        </Link>
-      </div>
-    )
-  }
-
-  if (!pokemon) return null
 
   const formattedName = pokemon.name
     .split('-')
@@ -208,4 +166,4 @@ function getStatColor(value: number): string {
   if (value >= 90) return '#3b82f6'  // blue-500
   if (value >= 60) return '#eab308'  // yellow-500
   return '#ef4444' // red-500
-} 
+}
