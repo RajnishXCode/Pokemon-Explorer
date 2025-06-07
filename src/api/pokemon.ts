@@ -12,7 +12,7 @@ interface PokemonListResponse {
   }[];
 }
 
-// Fetches all Pokemon with optimized caching
+// API call to Fetches all Pokemon with optimized caching
 export async function getAllPokemon(): Promise<Pokemon[]> {
   try {
     console.log('Fetching Pokemon list...');
@@ -54,7 +54,7 @@ export async function getAllPokemon(): Promise<Pokemon[]> {
 }
 
 
-// Fetches a specific Pokemon by ID
+// API call to Fetches a specific Pokemon by ID
 export async function getPokemonById(id: number): Promise<Pokemon> {
   try {
     console.log(`Fetching Pokemon #${id}`);
@@ -79,10 +79,7 @@ export async function getPokemonById(id: number): Promise<Pokemon> {
   }
 }
 
-/**
- * Searches Pokemon by name or type
- * Note: This leverages the cached getAllPokemon function
- */
+// Searches Pokemon by name or type (uses cached getAllPokemon function)
 export async function searchPokemons(query: string): Promise<Pokemon[]> {
   if (!query || query.trim() === '') {
     return getAllPokemon();

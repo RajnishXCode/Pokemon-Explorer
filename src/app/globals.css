@@ -86,3 +86,19 @@ body {
   transition-duration: 0.7s, 0.15s;
   transition-timing-function: ease;
 }
+
+
+/* Stats bar growing animation */
+@keyframes growWidth {
+  0% { width: 0; }
+  100% { width: var(--final-width); }
+}
+
+/* Add to existing code */
+.shine:hover::after {
+  opacity: 1;
+  left: 130%;
+  transition-property: left, opacity;
+  transition-duration: 0.7s, 0.15s;
+  transition-timing-function: ease;
+}

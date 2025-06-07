@@ -108,23 +108,30 @@ export default async function PokemonDetailPage({ params }: Props) {
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-3">Base Stats</h2>
               <div className="space-y-3">
-                {pokemon.stats.map((stat) => (
-                  <div key={stat.stat.name} className="flex items-center">
-                    <span className="w-24 text-sm text-gray-600 capitalize">{stat.stat.name}:</span>
-                    <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ 
-                          width: `${(stat.base_stat / 255) * 100}%`,
-                          backgroundColor: getStatColor(stat.base_stat)
-                        }}
-                      />
+                {pokemon.stats.map((stat, index) => {
+                  // Calculate percentage of max stat (255)
+                  const percentage = Math.min(100, (stat.base_stat / 255) * 100);
+                  
+                  return (
+                    <div key={stat.stat.name} className="flex items-center">
+                      <span className="w-24 text-sm text-gray-600 capitalize">{stat.stat.name.replace('-', ' ')}:</span>
+                      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full rounded-full"
+                          style={{ 
+                            backgroundColor: getStatColor(stat.base_stat),
+                            width: '0%', // Start at 0
+                            '--final-width': `${percentage}%`,
+                            animation: `growWidth 1s ease-out ${index * 0.1}s forwards`
+                          } as React.CSSProperties}
+                        />
+                      </div>
+                      <span className="w-12 text-right text-sm font-medium text-gray-700 ml-2">
+                        {stat.base_stat}
+                      </span>
                     </div>
-                    <span className="w-12 text-right text-sm font-medium text-gray-700 ml-2">
-                      {stat.base_stat}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
