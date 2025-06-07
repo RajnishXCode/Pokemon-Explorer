@@ -1,4 +1,6 @@
+// Colors based on the official Pokemon games
 export function getTypeColor(type: string): string {
+  // These are pretty close to the official colors from the games
   const colors: { [key: string]: string } = {
     normal: '#A8A878',
     fire: '#F08030',
@@ -19,5 +21,6 @@ export function getTypeColor(type: string): string {
     steel: '#B8B8D0',
     fairy: '#EE99AC',
   }
-  return colors[type] || '#777'
-} 
+  // Return the color or a default gray if type isn't found
+  return colors[type.toLowerCase()] || '#777'
+}

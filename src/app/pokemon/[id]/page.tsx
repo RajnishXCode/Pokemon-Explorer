@@ -117,12 +117,11 @@ export default async function PokemonDetailPage({ params }: Props) {
                       <span className="w-24 text-sm text-gray-600 capitalize">{stat.stat.name.replace('-', ' ')}:</span>
                       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div 
-                          className="h-full rounded-full"
+                          className="h-full rounded-full stat-bar"
                           style={{ 
                             backgroundColor: getStatColor(stat.base_stat),
-                            width: '0%', // Start at 0
-                            '--final-width': `${percentage}%`,
-                            animation: `growWidth 1s ease-out ${index * 0.1}s forwards`
+                            '--final-width': `${percentage}%`, // Set CSS variable for animation
+                            animationDelay: `${index * 0.1}s` // Delay each bar's animation
                           } as React.CSSProperties}
                         />
                       </div>

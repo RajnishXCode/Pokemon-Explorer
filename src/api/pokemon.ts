@@ -1,106 +1,100 @@
-import type { Pokemon } from '@/types/pokemon'
+import { Pokemon } from '@/types/pokemon'
 import { CONFIG } from '@/config'
 
-// Define the PokemonListResponse interface here since it's missing from types/pokemon
-interface PokemonListResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: {
-    name: string;
-    url: string;
-  }[];
-}
+// Reuse the type from types/api.ts
+import { PokemonListResponse } from '@/types/api'
 
-// API call to Fetches all Pokemon with optimized caching
+// Cache for pokemon data - poor man's solution but works for now
+let pokemonCache: Pokemon[] | null = null
+let cacheTime = 0
+
+// Gets all Pokemon - returns cached data if available and fresh
 export async function getAllPokemon(): Promise<Pokemon[]> {
-  try {
-    console.log('Fetching Pokemon list...');
-    const startTime = Date.now();
-    
-    // Use the configured URL and cache time
-    const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.POKEMON_LIST}`, {
-      next: { revalidate: CONFIG.CACHE_TIME },
-    })
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch Pokemon list: ${response.status}`);
-    }
-    
-    const data = await response.json() as PokemonListResponse;
-        
-    // Fetch all Pokemon details in parallel with proper caching
-    const pokemonDetails = await Promise.all(
-      data.results.map(async (pokemon) => {
-        const response = await fetch(pokemon.url, {
-          next: { revalidate: CONFIG.CACHE_TIME },
-        })
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch details for ${pokemon.name}: ${response.status}`);
-        }
-        
-        return response.json();
-      })
-    );
-
-    return pokemonDetails;
-  } catch (error) {
-    console.error('Error fetching Pokemon:', error);
-    throw error instanceof Error
-      ? error
-      : new Error('Failed to fetch Pokemon');
+  // Check if we have cached data that's still fresh
+  const now = Date.now() 
+  if (pokemonCache && (now - cacheTime) / 1000 < CONFIG.CACHE_TIME) {
+    console.log('Using cached Pokemon data')
+    return pokemonCache
   }
-}
 
-
-// API call to Fetches a specific Pokemon by ID
-export async function getPokemonById(id: number): Promise<Pokemon> {
   try {
-    console.log(`Fetching Pokemon #${id}`);
-    const startTime = Date.now();
+    // Fetch the first 151 Pokemon (all we need for now)
+    const res = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.POKEMON_LIST}`)
     
-    const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.POKEMON_BY_ID(id)}`, {
-      next: { revalidate: CONFIG.CACHE_TIME },
-    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch Pokemon: ${res.status}`)
+    }
 
-    if (!response.ok) {
-      throw new Error(`Pokemon #${id} not found (${response.status})`)
+    const data: PokemonListResponse = await res.json()
+    
+    // Now fetch the details for each Pokemon
+    // Could use Promise.all but that might hit rate limits
+    // So doing it sequentially for now
+    const pokemonDetails: Pokemon[] = []
+    
+    for (const item of data.results) {
+      // Extract ID from the URL since we need it anyway
+      const id = Number(item.url.split('/').filter(Boolean).pop())
+      const details = await getPokemonById(id)
+      pokemonDetails.push(details)
     }
     
-    const data = await response.json()
-    const endTime = Date.now()
-    console.log(`Fetch completed in ${(endTime - startTime) / 1000} seconds`)
+    // Update cache
+    pokemonCache = pokemonDetails
+    cacheTime = now
     
-    return data
+    return pokemonDetails
   } catch (error) {
-    console.error(`Error fetching Pokemon #${id}:`, error)
+    // This keeps breaking in development for some reason
+    console.error('Failed to fetch Pokemon list:', error)
     throw error
   }
 }
 
-// Searches Pokemon by name or type (uses cached getAllPokemon function)
-export async function searchPokemons(query: string): Promise<Pokemon[]> {
-  if (!query || query.trim() === '') {
-    return getAllPokemon();
+// Fetches a specific Pokemon by ID
+export async function getPokemonById(id: number): Promise<Pokemon> {
+  try {
+    const res = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.POKEMON_BY_ID(id)}`)
+    
+    if (!res.ok) {
+      throw new Error(`Failed to fetch Pokemon #${id}: ${res.status}`)
+    }
+
+    const pokemon = await res.json()
+    return pokemon
+  } catch (error) {
+    // Better error message for specific Pokemon
+    console.error(`Error fetching Pokemon #${id}:`, error)
+    throw error instanceof Error
+      ? error
+      : new Error(`Failed to fetch Pokemon #${id}`)
   }
+}
+
+// Basic search function - we'll improve this later maybe
+export async function searchPokemons(query: string): Promise<Pokemon[]> {
+  if (!query) return []
   
   try {
-    console.log(`Searching Pokemon with query: "${query}"`)
-    const allPokemons = await getAllPokemon();
+    // First get all Pokemon
+    const allPokemon = await getAllPokemon()
     
-    const normalizedQuery = query.toLowerCase().trim()
-    const filteredPokemons = allPokemons.filter(pokemon => 
-      pokemon.name.toLowerCase().includes(normalizedQuery) ||
-      pokemon.types.some(type => type.type.name.toLowerCase().includes(normalizedQuery))
-    )
-    
-    console.log(`Found ${filteredPokemons.length} Pokemon matching "${query}"`)
-    return filteredPokemons
+    // Then filter locally - PokeAPI doesn't have a search endpoint
+    const lowerQuery = query.toLowerCase()
+    return allPokemon.filter(pokemon => {
+      return (
+        // Check name
+        pokemon.name.toLowerCase().includes(lowerQuery) ||
+        // Check ID (as string)
+        pokemon.id.toString() === lowerQuery ||
+        // Check types
+        pokemon.types.some(({ type }) => 
+          type.name.toLowerCase().includes(lowerQuery)
+        )
+      )
+    })
   } catch (error) {
-    console.error('Error in searchPokemons:', error)
-    throw error instanceof Error
-      ? new Error(`Search failed: ${error.message}`)
-      : new Error('Search failed due to an unknown error')
+    console.error('Error searching Pokemon:', error)
+    return [] // Return empty array instead of throwing - better UX
   }
 }

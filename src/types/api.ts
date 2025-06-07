@@ -1,3 +1,4 @@
+// Response from PokeAPI's /pokemon endpoint
 export type PokemonListResponse = {
   count: number
   next: string | null
@@ -8,6 +9,7 @@ export type PokemonListResponse = {
   }[]
 }
 
+// For handling errors from the API
 export type ApiError = {
   message: string
   status?: number
